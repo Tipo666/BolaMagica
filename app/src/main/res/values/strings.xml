@@ -2,6 +2,7 @@
     <string name="app_name">Bola Mágica</string>
     <string name="shake_me">Agítame</string>
     <string name="menu_shake">Agitar</string>
+    <string name="imagenBola">ImgBola</string>
 
     <string-array name="answers">
        <item> En mi opinión, sí</item>

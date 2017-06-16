@@ -19,40 +19,41 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class cicloJuego extends AppCompatActivity implements SensorEventListener{
 
 
-    public static final int FADE_DURATION = 1500;
-    public static final int START_OFFSET = 1000;
-    public static final int VIBRATE_TIME = 250;
-    public static final int THRESHOLD = 240;
-    public static final int SHAKE_COUNT = 2;
+    public static final int DURACION_DESVANECIMIENTO = 1500;
+    public static final int INICIO_INTERVALO = 1000;
+    public static final int TIEMPO_VIBRACION = 250;
+    public static final int LIMITE = 240;
+    public static final int CONTADOR_MOVIMIENTOS = 2;
     private static Random RANDOM = new Random();
     private Vibrator vibrator;
     private SensorManager sensorManager;
     private Sensor sensor;
-    private float lastX, lastY, lastZ;
+    private float ultimoX, ultimoY, ultimoZ;
     private int shakeCount = 0;
-    private TextView msgTv;
-    private ImageView ball;
-    private Animation ballAnimation;
-    private ArrayList<String> answers;
+    private TextView mensaje;
+    private ImageView bola;
+    private Animation animacionBola;
+    private ArrayList<String> respuestas;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ciclo_juego);
-        ball = (ImageView) findViewById(R.id.ball);
-        msgTv = (TextView) findViewById(R.id.msgTv);
+        bola = (ImageView) findViewById(R.id.ball);
+        mensaje = (TextView) findViewById(R.id.msgTv);
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        ballAnimation = AnimationUtils.loadAnimation(this, R.anim.shake);
-        answers = loadAnswer();
+        animacionBola = AnimationUtils.loadAnimation(this, R.anim.shake);
+        respuestas = cargarRespuestas();
     }
 
     @Override
@@ -101,62 +102,58 @@ public class cicloJuego extends AppCompatActivity implements SensorEventListener
 
     private boolean isShakeEnough(float x, float y, float z){
         double force = 0d;
-        force += Math.pow((x - lastX) / sensorManager.GRAVITY_EARTH, 2.0);
-        force += Math.pow((y - lastY) / sensorManager.GRAVITY_EARTH, 2.0);
-        force += Math.pow((z - lastZ) / sensorManager.GRAVITY_EARTH, 2.0);
+        force += Math.pow((x - ultimoX) / SensorManager.GRAVITY_EARTH, 2.0);
+        force += Math.pow((y - ultimoY) / SensorManager.GRAVITY_EARTH, 2.0);
+        force += Math.pow((z - ultimoZ) / SensorManager.GRAVITY_EARTH, 2.0);
 
         force = Math.sqrt(force);
 
-        lastX = x;
-        lastY = y;
-        lastZ = z;
+        ultimoX = x;
+        ultimoY = y;
+        ultimoZ = z;
 
-        if(force > ((float) THRESHOLD/100f)){
-            ball.startAnimation(ballAnimation);
+        if(force > ((float) LIMITE /100f)){
+            bola.startAnimation(animacionBola);
             shakeCount++;
 
-            if(shakeCount > SHAKE_COUNT){
+            if(shakeCount > CONTADOR_MOVIMIENTOS){
                 shakeCount = 0;
-                lastX = 0;
-                lastY = 0;
-                lastZ = 0;
+                ultimoX = 0;
+                ultimoY = 0;
+                ultimoZ = 0;
                 return true;
             }
         }
-
         return false;
-
     }
 
     private void showAnswer(String answer, boolean withAnim){
         if(withAnim){
-            ball.startAnimation(ballAnimation);
+            bola.startAnimation(animacionBola);
         }
 
-        msgTv.setVisibility(View.INVISIBLE);
-        msgTv.setText(answer);
+        mensaje.setVisibility(View.INVISIBLE);
+        mensaje.setText(answer);
         AlphaAnimation animation = new AlphaAnimation(0, 1);
-        animation.setStartOffset(START_OFFSET);
-        msgTv.setVisibility(View.VISIBLE);
-        animation.setDuration(FADE_DURATION);
+        animation.setStartOffset(INICIO_INTERVALO);
+        mensaje.setVisibility(View.VISIBLE);
+        animation.setDuration(DURACION_DESVANECIMIENTO);
 
-        msgTv.startAnimation(animation);
-        vibrator.vibrate(VIBRATE_TIME);
+        mensaje.startAnimation(animation);
+        vibrator.vibrate(TIEMPO_VIBRACION);
     }
 
     private String getAnswer() {
-        int randomInt = RANDOM.nextInt(answers.size());
-        return answers.get(randomInt);
+        int randomInt = RANDOM.nextInt(respuestas.size());
+        return respuestas.get(randomInt);
     }
 
-    public  ArrayList<String> loadAnswer(){
+    public  ArrayList<String> cargarRespuestas(){
         ArrayList<String> list = new ArrayList<>();
         String[] tab = getResources().getStringArray(R.array.answers);
 
-        if(tab != null && tab.length > 0){
-            for (String str : tab) {
-                list.add(str);
-            }
+        if(tab.length > 0){
+            Collections.addAll(list, tab);
         }
 
         return list;
